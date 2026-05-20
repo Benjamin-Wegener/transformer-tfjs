@@ -3,6 +3,7 @@
 <!DOCTYPE html><html><head>
 <title>transformerTFJS</title>
 <meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230f1722'/%3E%3Cpath d='M14 42h36M14 32h24M14 22h30' stroke='%2376c1ff' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E" type="image/svg+xml">
 
 <!-- **************************************************************************
  * stylesheet
@@ -93,12 +94,10 @@ a {
 </style>
 
 <!-- **************************************************************************
- * import tensorflowJS
+ * import tensorflowJS (current CDN)
 -->
-<script src='tf.min@3.7.js'> </script>
-<!-- skip webgpu for now
-<script src='tfjs-backend-webgpu.browser.js'></script>
--->
+<script src='https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js'> </script>
+<script src='https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgpu@4.22.0/dist/tf-backend-webgpu.min.js'></script>
 
 <!-- **************************************************************************
  * import gpt-3 tokenizer (browserified from https://github.com/kafkas/GPT-3-Encoder)
@@ -632,15 +631,50 @@ window.onload = function(){
 		try{
 			console.log(tf.version);
 			tf.enableProdMode();
-			try{ 
-				await tf.ENV.set('WEBGL_PACK', false) //fix for crash since tfjs@3.4
-			}catch(err){}
-			try{ 
-				await tf.setBackend('webgpu')
-			}catch(err){}
+			let backendSelected = false;
+			try{
+				const ok = await tf.setBackend('webgpu');
+				if (ok) {
+					backendSelected = true;
+				} else {
+					await log('webgpu backend registration returned false');
+				}
+			}catch(err){
+				await log('webgpu init failed: ' + (err && err.message ? err.message : err));
+			}
+			if (!backendSelected) {
+				try {
+					const ok = await tf.setBackend('webgl');
+					backendSelected = !!ok;
+				} catch (err2) {}
+			}
+			if (!backendSelected) {
+				await tf.setBackend('cpu');
+			}
 			try{
 				await tf.ready();
 			}catch{err}
+			try {
+				await log('webgpu available: ' + (typeof navigator !== 'undefined' && !!navigator.gpu));
+				if (typeof navigator !== 'undefined' && navigator.gpu) {
+					try {
+						const adapter = await navigator.gpu.requestAdapter();
+						await log('webgpu adapter: ' + (adapter ? 'ok' : 'null'));
+						if (adapter) {
+							try {
+								const device = await adapter.requestDevice();
+								await log('webgpu device: ok');
+								try { device.destroy(); } catch (e) {}
+							} catch (e) {
+								await log('webgpu device failed: ' + (e && e.message ? e.message : e));
+							}
+						}
+					} catch (e) {
+						await log('webgpu adapter failed: ' + (e && e.message ? e.message : e));
+					}
+				}
+				await log('using backend: ' + tf.getBackend());
+			} catch (err) {}
 			await initialize();
 			await mainLoop();
 		}catch(err){

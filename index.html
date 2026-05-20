@@ -10,7 +10,85 @@
 <style>
 html {
 	text-size-adjust: 100%;
-	font-family: sans-serif;
+}
+body {
+	margin: 0;
+	font-family: "Inter", "Segoe UI", sans-serif;
+	background: radial-gradient(1200px 600px at 10% 0%, #1f3b57 0%, #0f1722 45%, #0a0f18 100%);
+	color: #e8edf3;
+	min-height: 100vh;
+}
+.shell {
+	max-width: 1100px;
+	margin: 32px auto;
+	padding: 24px;
+}
+.card {
+	background: rgba(11, 18, 30, 0.82);
+	border: 1px solid rgba(140, 170, 210, 0.25);
+	border-radius: 16px;
+	box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+	padding: 20px;
+}
+.title {
+	margin: 0 0 8px 0;
+	font-size: 26px;
+	line-height: 1.2;
+}
+.subtitle {
+	margin: 0 0 18px 0;
+	font-size: 14px;
+	color: #a8b9ce;
+}
+.topbar {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+	align-items: center;
+	margin-bottom: 14px;
+}
+button {
+	background: linear-gradient(180deg, #76c1ff 0%, #4c9be0 100%);
+	color: #0b1622;
+	border: none;
+	border-radius: 10px;
+	padding: 10px 14px;
+	font-weight: 700;
+	cursor: pointer;
+}
+button:hover {
+	filter: brightness(1.05);
+}
+.loglabel {
+	font-size: 13px;
+	color: #a8b9ce;
+	margin-bottom: 8px;
+}
+#log {
+	width: 100%;
+	height: 60vh;
+	background: #060b12;
+	color: #d5e3f2;
+	border: 1px solid #25384d;
+	border-radius: 12px;
+	padding: 12px;
+	font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+	font-size: 12px;
+	line-height: 1.45;
+	box-sizing: border-box;
+	resize: vertical;
+}
+a {
+	color: #93d1ff;
+}
+@media (max-width: 720px) {
+	.shell {
+		margin: 14px auto;
+		padding: 12px;
+	}
+	#log {
+		height: 68vh;
+	}
 }
 </style>
 
@@ -532,12 +610,17 @@ async function mainLoop(){
 -->
 </head>
 <body>
-<p><h1>text generation using <a href='https://arxiv.org/abs/2006.04768'>linformer</a> with causal training and linear attention in <a href='https://github.com/tensorflow/tfjs'>tensorflow.js</a></h1><br/>
-<a href="javascript:(async () => {document.getElementById('download').disabled = true;alert('accept multiple downloads');await model.save('downloads://' + MODEL_SAVE_NAME);document.getElementById('download').disabled = false})();"><button id="download">download current model</button></a>
-log:
-<div style="border:0px; margin:0px 0; padding:3px;">
-	<textarea id="log" rows="20" style="width:100%"></textarea>
-<div></p>
+<div class="shell">
+	<div class="card">
+		<h1 class="title">Transformer TFJS Trainer</h1>
+		<p class="subtitle">Linformer with causal training in TensorFlow.js (original model path).</p>
+		<div class="topbar">
+			<a href="javascript:(async () => {document.getElementById('download').disabled = true;alert('accept multiple downloads');await model.save('downloads://' + MODEL_SAVE_NAME);document.getElementById('download').disabled = false})();"><button id="download">Download Current Model</button></a>
+		</div>
+		<div class="loglabel">Training / inference log</div>
+		<textarea id="log" rows="20"></textarea>
+	</div>
+</div>
 </body>
 
 <!-- **************************************************************************
